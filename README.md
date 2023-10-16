@@ -106,14 +106,24 @@ fi
 ## Soal 2
 > Buatlah website utama pada node arjuna dengan akses ke arjuna.yyy.com dengan alias www.arjuna.yyy.com dengan yyy merupakan kode kelompok.
 ### Setup DNS for arjuna.it29.com (Yudhistira)
-1. Pada file `/etc/bind/named.local.conf` tambahkan line berikut:
+1. Install depedencies
+```bash
+# install dependencies
+apt-get update -y
+apt-get install bind9 -y
+```
+2. Start bind9
+```bash
+service bind9 start
+```
+3. Pada file `/etc/bind/named.local.conf` tambahkan line berikut:
 ```
 zone "arjuna.it29.com" {
     type master;
     file "/etc/bind/it29/arjuna.it29.com";
 };
 ```
-2. Buat DNS recordnya pada `/etc/bind/it29/arjuna.it29.com`:
+4. Buat DNS recordnya pada `/etc/bind/it29/arjuna.it29.com`:
 ```
 $TTL    604800
 @       IN      SOA     arjuna.it29.com. root.arjuna.it29.com. (
@@ -126,6 +136,10 @@ $TTL    604800
 @       IN      NS      arjuna.it29.com.
 @       IN      A       10.78.1.4
 www     IN      CNAME   arjuna.it29.com.
+```
+5. Restart bind9 service
+```
+service bind9 restart
 ```
 ## Soal 3
 > Dengan cara yang sama seperti soal nomor 2, buatlah website utama dengan akses ke abimanyu.yyy.com dan alias www.abimanyu.yyy.com.
@@ -151,6 +165,10 @@ $TTL    604800
 @           IN      A       10.78.2.4
 www         IN      CNAME   abimanyu.it29.com.
 ```
+3. Restart bind9 service
+```
+service bind9 restart
+```
 ## Soal 4
 > Kemudian, karena terdapat beberapa web yang harus di-deploy, buatlah subdomain parikesit.abimanyu.yyy.com yang diatur DNS-nya di Yudhistira dan mengarah ke Abimanyu.
 ### Setup DNS for parikesit.abimanyu.it29.com (Yudhistira)
@@ -175,6 +193,10 @@ $TTL    604800
 @       IN      A       10.78.2.4
 www     IN      CNAME   parikesit.abimanyu.it29.com.
 ```
+3. Restart bind9 service
+```
+service bind9 restart
+```
 ## Soal 5
 > Buat juga reverse domain untuk domain utama. (Abimanyu saja yang direverse)
 ### Setup Reverse DNS for abimanyu.it29.com (Yudhistira)
@@ -198,6 +220,10 @@ $TTL    604800
 2.78.10.in-addr.arpa.   IN      NS      abimanyu.it29.com.
 4                       IN      PTR     abimanyu.it29.com.
 ```
+3. Restart bind9 service
+```
+service bind9 restart
+```
 ## Soal 6
 > Agar dapat tetap dihubungi ketika DNS Server Yudhistira bermasalah, buat juga Werkudara sebagai DNS Slave untuk domain utama.
 ### Setup DNS for arjuna.it29.com & abimanyu.it29.com on DNS Master (Yudhistira)
@@ -219,8 +245,22 @@ zone "abimanyu.it29.com" {
     file "/etc/bind/it29/abimanyu.it29.com";
 };
 ```
+2. Restart bind9 service
+```
+service bind9 restart
+```
 ### Setup DNS for arjuna.it29.com & abimanyu.it29.com on DNS Slave (Werkudara)
-1. Pada file `/etc/bind/named.local.conf` tambahkan line berikut:
+1. Install depedencies
+```
+# install dependencies
+apt-get update -y
+apt-get install bind9 -y
+```
+2. Start bind9 service
+```
+service bind9 start
+```
+3. Pada file `/etc/bind/named.local.conf` tambahkan line berikut:
 ```
 zone "arjuna.it29.com" {
     type slave;
@@ -234,7 +274,7 @@ zone "abimanyu.it29.com" {
     file "/etc/bind/it29/abimanyu.it29.com";
 };
 ```
-2. Buat DNS record untuk kedua domain. Berikut adalah DNS record untuk domain arjuna.it29.com pada file `/etc/bind/it29/arjuna.it29.com`.
+4. Buat DNS record untuk kedua domain. Berikut adalah DNS record untuk domain arjuna.it29.com pada file `/etc/bind/it29/arjuna.it29.com`.
 ```
 $TTL    604800
 @       IN      SOA     arjuna.it29.com. root.arjuna.it29.com. (
@@ -261,6 +301,10 @@ $TTL    604800
 @       IN      NS      arjuna.it29.com.
 @       IN      A       10.78.1.4
 www     IN      CNAME   arjuna.it29.com.
+```
+5. Restart bind9 service
+```
+service bind9 restart
 ```
 ## Soal 7
 > Seperti yang kita tahu karena banyak sekali informasi yang harus diterima, buatlah subdomain khusus untuk perang yaitu baratayuda.abimanyu.yyy.com dengan alias www.baratayuda.abimanyu.yyy.com yang didelegasikan dari Yudhistira ke Werkudara dengan IP menuju ke Abimanyu dalam folder Baratayuda.
@@ -292,6 +336,10 @@ options {
         listen-on-v6 { any; };
 };
 ```
+3. Restart bind9 service
+```
+service bind9 restart
+```
 ### Setup DNS for baratayuda.abimanyu.it29.com on DNS Slave (Werkudara)
 1. Pada file `/etc/bind/named.local.conf` tambahkan line seperti berikut:
 ```
@@ -313,6 +361,10 @@ $TTL    604800
 @           IN      NS      baratayuda.abimanyu.it29.com.
 @           IN      A       10.78.2.4
 www         IN      CNAME   baratayuda.abimanyu.it29.com.
+```
+3. Restart bind9 service
+```
+service bind9 restart
 ```
 ## Soal 8
 > Untuk informasi yang lebih spesifik mengenai Ranjapan Baratayuda, buatlah subdomain melalui Werkudara dengan akses rjp.baratayuda.abimanyu.yyy.com dengan alias www.rjp.baratayuda.abimanyu.yyy.com yang mengarah ke Abimanyu.
@@ -337,6 +389,10 @@ $TTL    604800
 @           IN      NS      rjp.baratayuda.abimanyu.it29.com.
 @           IN      A       10.78.2.4
 www         IN      CNAME   rjp.baratayuda.abimanyu.it29.com.
+```
+3. Restart bind9 service
+```
+service bind9 restart
 ```
 ## Soal 9 & Soal 10
 > Arjuna merupakan suatu Load Balancer Nginx dengan tiga worker (yang juga menggunakan nginx sebagai webserver) yaitu Prabakusuma, Abimanyu, dan Wisanggeni. Lakukan deployment pada masing-masing worker.
@@ -380,6 +436,10 @@ http {
         }
     }
 }
+```
+3. Start nginx service
+```
+service nginx start
 ```
 ### Setup Load Balancer Worker (Prabukusuma, Wisanggeni, Abimanyu)
 1. Install depedencies pada semua worker
@@ -485,7 +545,9 @@ unzip /tmp/dist.zip -d /tmp
 
 # move dist to /var/www/arjuna.it29.com
 mv /tmp/arjuna.yyy.com/index.php /var/www/arjuna.it29.com/index.php
-
+```
+5. Start php dan nginx service
+```
 # start php
 service php7.2-fpm start
 
@@ -552,4 +614,5 @@ a2dissite 000-default.conf
 service apache2 start
 ```
 ## Soal 12
-...
+> Setelah itu ubahlah agar url www.abimanyu.yyy.com/index.php/home menjadi www.abimanyu.yyy.com/home.
+### 

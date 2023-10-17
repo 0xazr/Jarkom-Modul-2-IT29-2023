@@ -678,7 +678,7 @@ service apache2 restart
 ```
 ## Soal 14
 > Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
-### Set Forbidden Rule for /secret directory (Abimanyu)
+### Set forbidden rule for /secret directory (Abimanyu)
 1. Buat folder /secret dan isi dengan test file
 ```
 # add secret/ folder to parikesit.abimanyu.it29
@@ -690,3 +690,143 @@ echo "SECRET FILE!!!" > /var/www/parikesit.abimanyu.it29/secret/secret.txt
 Options -Indexes
 ```
 ## Soal 15
+> Buatlah kustomisasi halaman error pada folder /error untuk mengganti error kode pada Apache. Error kode yang perlu diganti adalah 404 Not Found dan 403 Forbidden.
+### Set custom error for 404 and 403 page (Abimanyu)
+1. Tambahkan line berikut pada `/var/www/parikesit.abimanyu.it29/.htaccess`
+```
+ErrorDocument 404 /error/404.html
+ErrorDocument 403 /error/403.html
+```
+## Soal 16
+> Buatlah suatu konfigurasi virtual host agar file asset www.parikesit.abimanyu.yyy.com/public/js menjadi www.parikesit.abimanyu.yyy.com/js (Abimanyu)
+### Set alias for "/js" to "/public/js"
+1. Tambahkan line berikut pada file `/etc/apache2/sites-available/parikesit.abimanyu.it29.com.conf`
+```
+Alias "/js" "/var/www/parikesit.abimanyu.it29/public/js"
+```
+Sehingga menjadi seperti berikut:
+```
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/parikesit.abimanyu.it29
+    ServerName parikesit.abimanyu.it29.com
+    ServerAlias www.parikesit.abimanyu.it29.com
+
+    <Directory /var/www/parikesit.abimanyu.it29>
+        Options +FollowSymLinks -Multiviews
+        AllowOverride All
+    </Directory>
+
+    Alias "/js" "/var/www/parikesit.abimanyu.it29/public/js"
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+2. Restart apache2 service
+```
+service apache2 restart
+```
+## Soal 17 & Soal 18
+> Agar aman, buatlah konfigurasi agar www.rjp.baratayuda.abimanyu.yyy.com hanya dapat diakses melalui port 14000 dan 14400.
+### Setup web server for rjp.baratayuda.abimanyu.it29.com (Abimanyu)
+1. Buat konfigurasi web server pada file `/etc/apache2/sites-available/rjp.baratayuda.abimanyu.it29.com.conf`
+```
+<VirtualHost *:14000 *:14400>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/rjp.baratayuda.abimanyu.it29
+    ServerName rjp.baratayuda.abimanyu.it29.com
+    ServerAlias www.rjp.baratayuda.abimanyu.it29.com
+
+    <Directory /var/www/rjp.baratayuda.abimanyu.it29>
+        Options +FollowSymLinks -Multiviews
+        AllowOverride All
+	AuthType Basic
+        AuthName "Restricted Content"
+        AuthUserFile /var/www/rjp.baratayuda.abimanyu.it29/.htpasswd
+        Require valid-user
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+```
+2. Enable konfigurasi rjp.baratayuda.abimanyu.it29.com.conf dengan command berikut:
+```bash
+# a2ensite rjp.baratayuda.abimanyu.it29.com
+a2ensite rjp.baratayuda.abimanyu.it29.com
+```
+3. Deployment resource and generate credentials
+```bash
+# create directory for rjp.baratayuda.abimanyu.it29.com
+mkdir -p /var/www/rjp.baratayuda.abimanyu.it29
+
+# wget rjp.baratayuda_dist.zip
+wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1pPSP7yIR05JhSFG67RVzgkb-VcW9vQO6' -O /tmp/rjp.baratayuda_dist.zip
+
+# unzip rjp.baratayuda_dist.zip --force
+unzip -o /tmp/rjp.baratayuda_dist.zip -d /tmp
+
+# move dist to /var/www/rjp.baratayuda.abimanyu.it29
+mv /tmp/rjp.baratayuda.abimanyu.yyy.com/* /var/www/rjp.baratayuda.abimanyu.it29/ -f
+
+# add .htpasswd for rjp.baratayuda.abimanyu.it29
+htpasswd -b -c /var/www/rjp.baratayuda.abimanyu.it29/.htpasswd Wayang baratayudait29
+```
+4. Edit file `/etc/apache2/ports.conf` menjadi seperti berikut:
+```
+# If you just change the port or add more ports here, you will likely also
+# have to change the VirtualHost statement in
+# /etc/apache2/sites-enabled/000-default.conf
+
+Listen 80
+Listen 14000
+Listen 14400
+
+<IfModule ssl_module>
+        Listen 443
+</IfModule>
+
+<IfModule mod_gnutls.c>
+        Listen 443
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+```
+5. Restart apache2 service
+```bash
+service apache2 restart
+```
+## Soal 19
+> Buatlah agar setiap kali mengakses IP dari Abimanyu akan secara otomatis dialihkan ke www.abimanyu.yyy.com (alias)
+### Create redirect configuration
+1. Buat konfigurasi pada file `/etc/apache2/sites-available/abimanyu.ip.conf` seperti berikut:
+```
+<VirtualHost *:80>
+    ServerName 10.78.2.4
+    Redirect permanent / http://abimanyu.it29.com
+</VirtualHost>
+```
+2. Enable konfigurasi dengan command berikut:
+```bash
+# a2ensite abimanyu.ip
+a2ensite abimanyu.ip
+```
+3. Restart service apache2
+```
+service apache2 restart
+```
+## Soal 20
+> Karena website www.parikesit.abimanyu.yyy.com semakin banyak pengunjung dan banyak gambar gambar random, maka ubahlah request gambar yang memiliki substring “abimanyu” akan diarahkan menuju abimanyu.png.
+### Add rule
+1. Edit file `/var/www/parikesit.abimanyu.it29/.htaccess` sehingga menjadi seperti berikut:
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/public/images/abimanyu.png$
+RewriteRule ^(.*)\.(jpg|jpeg|png|gif)$ /public/images/abimanyu.png [NC,L]
+
+ErrorDocument 404 /error/404.html
+ErrorDocument 403 /error/403.html
+```

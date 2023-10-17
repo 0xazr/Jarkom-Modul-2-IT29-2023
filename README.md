@@ -615,4 +615,78 @@ service apache2 start
 ```
 ## Soal 12
 > Setelah itu ubahlah agar url www.abimanyu.yyy.com/index.php/home menjadi www.abimanyu.yyy.com/home.
-### 
+### Change /home to /index.php/home (Abimanyu)
+1. Enable module rewrite pada apache2
+```
+# activate rewrite module
+a2enmod rewrite
+
+# restart apache2
+service apache2 restart
+```
+2. Buat file /var/www/abimanyu.it29/.htaccess dengan isi sebagai berikut:
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^home$ /index.php/home [NC,L]
+```
+## Soal 13
+> Selain itu, pada subdomain www.parikesit.abimanyu.yyy.com, DocumentRoot disimpan pada /var/www/parikesit.abimanyu.yyy
+### Setup web server for parikesit.abimanyu.it29.com (Abimanyu)
+1. Buat konfigurasi web server pada file `/etc/apache2/sites-available/parikesit.abimanyu.it29.com.conf`
+```
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/parikesit.abimanyu.it29
+    ServerName parikesit.abimanyu.it29.com
+    ServerAlias www.parikesit.abimanyu.it29.com
+
+    <Directory /var/www/parikesit.abimanyu.it29>
+        Options +FollowSymLinks -Multiviews
+        AllowOverride All
+    </Directory>
+
+    Alias "/js" "/var/www/parikesit.abimanyu.it29/public/js"
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+```
+2. Enable konfigurasi abimanyu.it29.com.conf dengan command berikut:
+```bash
+# a2ensite parikesit.abimanyu.it29.com
+a2ensite parikesit.abimanyu.it29.com
+```
+3. Deployment resource
+```bash
+# create directory for parikesit.abimanyu.it29.com
+mkdir -p /var/www/parikesit.abimanyu.it29
+
+# wget parikesit_dist.zip
+wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1LdbYntiYVF_NVNgJis1GLCLPEGyIOreS' -O /tmp/parikesit_dist.zip
+
+# unzip parikesit_dist.zip --force
+unzip -o /tmp/parikesit_dist.zip -d /tmp
+
+# move dist to /var/www/parikesit.abimanyu.it29
+mv /tmp/parikesit.abimanyu.yyy.com/* /var/www/parikesit.abimanyu.it29/ -f
+```
+4. Restart Apache2 service
+```bash
+service apache2 restart
+```
+## Soal 14
+> Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
+### Set Forbidden Rule for /secret directory (Abimanyu)
+1. Buat folder /secret dan isi dengan test file
+```
+# add secret/ folder to parikesit.abimanyu.it29
+mkdir -p /var/www/parikesit.abimanyu.it29/secret
+echo "SECRET FILE!!!" > /var/www/parikesit.abimanyu.it29/secret/secret.txt
+```
+2. Buat .htaccess pada `/var/www/parikesit.abimanyu.it29/secret/.htaccess`
+```
+Options -Indexes
+```
+## Soal 15
